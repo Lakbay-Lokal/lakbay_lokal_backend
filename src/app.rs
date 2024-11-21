@@ -3,7 +3,7 @@ use std::path::Path;
 use async_trait::async_trait;
 use loco_rs::{
     app::{AppContext, Hooks},
-    bgworker::{BackgroundWorker, Queue},
+    bgworker::{Queue},
     boot::{create_app, BootResult, StartMode},
     controller::AppRoutes,
     db::{self, truncate_table},
@@ -14,7 +14,7 @@ use loco_rs::{
 use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
-use crate::{controllers, models::_entities::users, tasks, workers::downloader::DownloadWorker};
+use crate::{controllers, models::_entities::users};
 
 pub struct App;
 #[async_trait]
@@ -39,16 +39,15 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
-            .add_route(controllers::auth::routes())
     }
 
-    async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
-        queue.register(DownloadWorker::build(ctx)).await?;
+    async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {
+        // queue.register(DownloadWorker::build(ctx)).await?;
         Ok(())
     }
 
-    fn register_tasks(tasks: &mut Tasks) {
-        tasks.register(tasks::seed::SeedData);
+    fn register_tasks(_tasks: &mut Tasks) {
+        // tasks.register(tasks::seed::SeedData);
     }
 
     async fn truncate(db: &DatabaseConnection) -> Result<()> {
