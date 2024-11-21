@@ -14,7 +14,7 @@ use loco_rs::{
 use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
-use crate::{controllers, models::_entities::users};
+use crate::{controllers};
 
 pub struct App;
 #[async_trait]
@@ -51,12 +51,12 @@ impl Hooks for App {
     }
 
     async fn truncate(db: &DatabaseConnection) -> Result<()> {
-        truncate_table(db, users::Entity).await?;
+        // truncate_table(db, users::Entity).await?;
         Ok(())
     }
 
     async fn seed(db: &DatabaseConnection, base: &Path) -> Result<()> {
-        db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
+        // db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
         Ok(())
     }
 }
