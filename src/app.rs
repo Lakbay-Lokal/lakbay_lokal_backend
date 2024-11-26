@@ -1,9 +1,10 @@
 use std::path::Path;
 
 use async_trait::async_trait;
+use axum::{middleware, Router};
 use loco_rs::{
     app::{AppContext, Hooks},
-    bgworker::{Queue},
+    bgworker::Queue,
     boot::{create_app, BootResult, StartMode},
     controller::AppRoutes,
     db::{self, truncate_table},
@@ -14,7 +15,8 @@ use loco_rs::{
 use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
-use crate::{controllers};
+use crate::controllers;
+use crate::middleware::auth::middleware_authentication;
 
 pub struct App;
 #[async_trait]
@@ -39,6 +41,11 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
+            .add_route(controllers::ticketing::routes())
+            .add_route(controllers::user::tracking::routes())
+            .add_route(controllers::user::routes())
+            .add_route(controllers::auth::routes())
+            .prefix("api")
     }
 
     async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {
@@ -58,5 +65,20 @@ impl Hooks for App {
     async fn seed(db: &DatabaseConnection, base: &Path) -> Result<()> {
         // db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
         Ok(())
+    }
+
+    async fn after_routes(router: Router, ctx: &AppContext) -> Result<Router> {
+        let jwt_config = ctx
+            .config
+            .get_jwt_config()
+            .map_err(|e| {
+                tracing::error!("Failed to get jwt config: {:?}", e);
+                e
+            })?
+            .clone();
+        Ok(router.layer(middleware::from_fn_with_state(
+            jwt_config,
+            middleware_authentication,
+        )))
     }
 }

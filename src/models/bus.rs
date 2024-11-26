@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use super::_entities::bus::{ActiveModel, Entity};
+use sea_orm::entity::prelude::*;
 pub type Bus = Entity;
 
 impl ActiveModelBehavior for ActiveModel {

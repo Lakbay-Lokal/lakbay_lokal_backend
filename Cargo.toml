@@ -36,6 +36,9 @@ include_dir = "0.7"
 uuid = { version = "1.6.0", features = ["v4"] }
 tracing-subscriber = { version = "0.3.17", features = ["env-filter", "json"] }
 
+# Packages used by the Server
+jsonwebtoken = "9.3.0"
+
 [[bin]]
 name = "lakbay_lokal_backend-cli"
 path = "src/bin/main.rs"

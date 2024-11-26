@@ -1,5 +1,5 @@
-use sea_orm_migration::{prelude::*, schema::*};
 use crate::m20241121_160948_station_model::Station;
+use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -33,11 +33,7 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .not_null(),
             )
-            .col(
-                ColumnDef::new(RouteNode::RouteId)
-                    .integer()
-                    .not_null(),
-            )
+            .col(ColumnDef::new(RouteNode::RouteId).integer().not_null())
             .col(
                 ColumnDef::new(RouteNode::OriginStation)
                     .integer()
@@ -78,22 +74,14 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         println!("{}", table.build(PostgresQueryBuilder));
-        manager.create_table(
-            table
-        )
-                .await?;
+        manager.create_table(table).await?;
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager.drop_table(
-            Table::drop()
-                .table(RouteNode::Table)
-                .if_exists()
-                .to_owned()
-        )
-                .await?;
+        manager
+            .drop_table(Table::drop().table(RouteNode::Table).if_exists().to_owned())
+            .await?;
         Ok(())
     }
 }
-

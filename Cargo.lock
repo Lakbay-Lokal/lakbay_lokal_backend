@@ -2037,6 +2037,7 @@ dependencies = [
  "chrono",
  "include_dir",
  "insta",
+ "jsonwebtoken",
  "loco-rs",
  "migration",
  "rstest",

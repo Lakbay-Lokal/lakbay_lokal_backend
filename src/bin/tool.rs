@@ -1,5 +1,5 @@
-use loco_rs::cli;
 use lakbay_lokal_backend::app::App;
+use loco_rs::cli;
 use migration::Migrator;
 
 #[tokio::main]
