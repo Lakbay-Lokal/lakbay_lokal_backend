@@ -1,16 +1,15 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unnecessary_struct_initialization)]
 #![allow(clippy::unused_async)]
-use crate::middleware::auth::{AuthType};
+use crate::middleware::auth::AuthorizationType;
 use crate::models::_entities::user;
 use axum::{debug_handler, Extension};
 use loco_rs::prelude::*;
-use sea_orm::DeriveEntityModel;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PutUpdateUserLocation {
+pub struct PatchUpdateUserLocation {
     pub user_id: i32,
     pub location_longitude: f64,
     pub location_latitude: f64,
@@ -19,8 +18,8 @@ pub struct PutUpdateUserLocation {
 #[debug_handler]
 pub async fn update_user_location(
     State(ctx): State<AppContext>,
-    Extension(auth_type): Extension<AuthType>,
-    Json(json): Json<PutUpdateUserLocation>,
+    Extension(auth_type): Extension<AuthorizationType>,
+    Json(json): Json<PatchUpdateUserLocation>,
 ) -> Result<Response> {
     auth_type.validate_by_id(json.user_id)?;
 
@@ -47,5 +46,7 @@ pub async fn update_user_location(
 }
 
 pub fn routes() -> Routes {
-    Routes::new().prefix("users/tracking")
+    Routes::new()
+        .prefix("users/tracking")
+        .add("", patch(update_user_location))
 }

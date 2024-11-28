@@ -1,11 +1,10 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unnecessary_struct_initialization)]
 #![allow(clippy::unused_async)]
-use crate::middleware::auth::{AuthType};
+use crate::middleware::auth::AuthorizationType;
 use crate::models::_entities::user;
 use axum::{debug_handler, Extension};
 use loco_rs::prelude::*;
-use sea_orm::DeriveEntityModel;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -27,10 +26,19 @@ pub struct GetUserInfoResponse {
     pub phone: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PatchUserInfo {
+    pub user_id: i32,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+}
+
 #[debug_handler]
 pub async fn get_user_info(
     State(ctx): State<AppContext>,
-    Extension(auth_type): Extension<AuthType>,
+    Extension(auth_type): Extension<AuthorizationType>,
     Json(request): Json<GetUserInfoRequest>,
 ) -> Result<Response> {
     auth_type.validate_by_id(request.user_id)?;
@@ -54,20 +62,11 @@ pub async fn get_user_info(
     })
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct PutUserInfo {
-    pub user_id: i32,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-}
-
 #[debug_handler]
 pub async fn put_user_info(
     State(ctx): State<AppContext>,
-    Extension(auth_type): Extension<AuthType>,
-    Json(json): Json<PutUserInfo>,
+    Extension(auth_type): Extension<AuthorizationType>,
+    Json(json): Json<PatchUserInfo>,
 ) -> Result<Response> {
     auth_type.validate_by_id(json.user_id)?;
 
@@ -106,7 +105,7 @@ pub async fn put_user_info(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("users/")
+        .prefix("user/")
         .add("/", get(get_user_info))
-        .add("/", put(put_user_info))
+        .add("/", patch(put_user_info))
 }

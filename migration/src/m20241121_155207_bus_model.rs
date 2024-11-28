@@ -1,6 +1,6 @@
 use crate::m20241121_154531_driver_model::BusDriver;
 use crate::m20241121_160948_station_model::Station;
-use sea_orm_migration::{prelude::*, schema::*};
+use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;

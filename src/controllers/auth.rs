@@ -44,7 +44,7 @@ pub async fn register(
     // Should probably use the Appropriate　HTTP status code
 
     // Check if user already exists, if username exists, email exists, phone number exists, return error
-    if let Some(user) = user::Entity::find()
+    if let Some(_user) = user::Entity::find()
         // use or
         .filter(
             Condition::any()
@@ -116,7 +116,7 @@ pub struct LoginRequest {
 }
 
 impl<'de> Deserialize<'de> for LoginRequest {
-    fn deserialize<D>(deserializer: D) -> Result<LoginRequest, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -136,7 +136,7 @@ impl<'de> Deserialize<'de> for LoginRequest {
             Some(serde_json::Value::String(s)) => s.to_string(),
             _ => return Err(serde::de::Error::custom("Invalid password")),
         };
-        Ok(LoginRequest {
+        Ok(Self {
             login_type,
             password,
         })
@@ -199,7 +199,12 @@ pub async fn login(
             tracing::error!("Failed to get time: {:?}", e);
             Error::InternalServerError
         })?
-        .as_secs() as i64;
+        .as_secs()
+        .try_into()
+        .map_err(|e| {
+            tracing::error!("Failed to convert time: {:?}", e);
+            Error::InternalServerError
+        })?;
 
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),

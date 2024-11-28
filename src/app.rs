@@ -7,7 +7,7 @@ use loco_rs::{
     bgworker::Queue,
     boot::{create_app, BootResult, StartMode},
     controller::AppRoutes,
-    db::{self, truncate_table},
+    // db::{self, truncate_table},
     environment::Environment,
     task::Tasks,
     Result,
@@ -41,10 +41,17 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes() // controller routes below
+            .add_route(controllers::route::routes())
+            .add_route(controllers::station::routes())
             .add_route(controllers::ticketing::routes())
             .add_route(controllers::user::tracking::routes())
             .add_route(controllers::user::routes())
             .add_route(controllers::auth::routes())
+            .add_route(controllers::bus::routes())
+            .add_route(controllers::bus::tracking::routes())
+            .add_route(controllers::bus::tracking_all::routes())
+            .add_route(controllers::route::routes())
+            .add_route(controllers::station::routes())
             .prefix("api")
     }
 
@@ -57,12 +64,12 @@ impl Hooks for App {
         // tasks.register(tasks::seed::SeedData);
     }
 
-    async fn truncate(db: &DatabaseConnection) -> Result<()> {
+    async fn truncate(_db: &DatabaseConnection) -> Result<()> {
         // truncate_table(db, users::Entity).await?;
         Ok(())
     }
 
-    async fn seed(db: &DatabaseConnection, base: &Path) -> Result<()> {
+    async fn seed(_db: &DatabaseConnection, _base: &Path) -> Result<()> {
         // db::seed::<users::ActiveModel>(db, &base.join("users.yaml").display().to_string()).await?;
         Ok(())
     }

@@ -1,5 +1,5 @@
 use crate::m20241121_160948_station_model::Station;
-use sea_orm_migration::{prelude::*, schema::*};
+use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -8,7 +8,7 @@ pub struct Migration;
 pub enum RouteNode {
     Table,
     Id,
-    IsStartOfRoute,
+    RouteIndex,
     RouteId,
 
     // Foreign keys
@@ -28,11 +28,7 @@ impl MigrationTrait for Migration {
                     .primary_key()
                     .auto_increment(),
             )
-            .col(
-                ColumnDef::new(RouteNode::IsStartOfRoute)
-                    .boolean()
-                    .not_null(),
-            )
+            .col(ColumnDef::new(RouteNode::RouteIndex).integer().not_null())
             .col(ColumnDef::new(RouteNode::RouteId).integer().not_null())
             .col(
                 ColumnDef::new(RouteNode::OriginStation)

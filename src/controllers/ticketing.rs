@@ -1,13 +1,12 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unnecessary_struct_initialization)]
 #![allow(clippy::unused_async)]
-use loco_rs::prelude::*;
+use crate::middleware::auth::BusAuthorizationType;
+use crate::models::_entities::ticket;
 use axum::{debug_handler, Extension};
+use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use crate::middleware::auth::{BusAuthType};
-use crate::models;
-use crate::models::_entities::ticket;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateBusTicketRequest {
@@ -23,7 +22,7 @@ pub struct CreateBusTicketRequest {
 #[debug_handler]
 pub async fn create_bus_ticket(
     State(ctx): State<AppContext>,
-    Extension(bus_auth): Extension<BusAuthType>,
+    Extension(bus_auth): Extension<BusAuthorizationType>,
     Json(json): Json<CreateBusTicketRequest>,
 ) -> Result<Response> {
     bus_auth.validate_by_id(json.bus_id)?;
@@ -42,16 +41,35 @@ pub async fn create_bus_ticket(
 
     ticket.save(&ctx.db).await?;
 
+    format::json(json!({
+        "message": "Ticket created successfully"
+    }))
+}
 
-    format::json(
-        json!({
-            "message": "Ticket created successfully"
-        })
-    )
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetBustTicketRequest {
+    ticket_id: i32,
+}
+
+#[debug_handler]
+pub async fn get_bus_ticket_by_id(
+    State(ctx): State<AppContext>,
+    Extension(bus_auth): Extension<BusAuthorizationType>,
+    Json(json): Json<GetBustTicketRequest>,
+) -> Result<Response> {
+    bus_auth.validate_by_id(json.ticket_id)?;
+
+    let ticket = ticket::Entity::find()
+        .filter(ticket::Column::Id.eq(json.ticket_id))
+        .one(&ctx.db)
+        .await?;
+
+    format::json(&ticket)
 }
 
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("ticketing/")
         .add("/", post(create_bus_ticket))
+        .add("/", get(get_bus_ticket_by_id))
 }

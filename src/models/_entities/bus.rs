@@ -13,6 +13,7 @@ pub struct Model {
     #[sea_orm(column_type = "Double")]
     pub location_latitude: f64,
     pub number_of_people_inside: i32,
+    pub is_running: bool,
     pub route_id: i32,
     pub next_station_id: i32,
     pub assigned_driver: i32,
